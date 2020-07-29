@@ -1,29 +1,32 @@
 'use strict';
 
+// MongoDB
+var dbConf = require('../utils/db_conf');
+const { url, client_options } = require('../utils/db_conf');
+var mongoose = require('mongoose');
+var { Spic } = require('../utils/models');
+const { MongoClient, ObjectID } = require('mongodb');
 
-/**
- * Servidores públicos que intervienen en contrataciones
- *
- * returns dependencias
- **/
+
 exports.get_dependencias = function() {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "clave" : "XYZ987",
-  "siglas" : "SHCP",
-  "nombre" : "Secretaría baaaaaaammmmmmmmm"
-}, {
-  "clave" : "XYZ987",
-  "siglas" : "SHCP",
-  "nombre" : "Secretaría de Hacienda y Crédito Público"
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
+
+     MongoClient.connect(dbConf.url, dbConf.client_options).then(client => {
+     const db = client.db();
+     const spic = db.collection('spic');
+
+     spic.createIndex({ 'posts.when': -1 })
+
+     .then(() => spic.aggregate([
+      { $group: { _id: { nombre: "$institucionDependencia.nombre", siglas: "$institucionDependencia.siglas", clave: "$institucionDependencia.clave" } } },
+       ]).toArray())
+           .then(results => {
+            return resolve(results);
+        });
+     });
+
+
+});
 }
 
 
@@ -168,4 +171,6 @@ exports.post_spic = function(body) {
     }
   });
 }
+
+
 

@@ -7,6 +7,7 @@ module.exports.get_dependencias = function get_dependencias (req, res, next) {
   Spic.get_dependencias()
     .then(function (response) {
       utils.writeJson(res, response);
+      
     })
     .catch(function (response) {
       utils.writeJson(res, response);
