@@ -11,9 +11,11 @@ var options = {
     controllers: path.join(__dirname, './controllers')
 };
 
+
 var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
 expressAppConfig.addValidator();
 var app = expressAppConfig.getApp();
+
 
 // Initialize the Swagger middleware
 http.createServer(app).listen(serverPort, function () {
