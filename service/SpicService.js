@@ -1,12 +1,16 @@
 'use strict';
 
 // MongoDB
-var dbConf = require('../utils/db_conf');
-const { url, client_options } = require('../utils/db_conf');
 var mongoose = require('mongoose');
 var { Spic } = require('../utils/models');
-const { MongoClient, ObjectID } = require('mongodb');
 
+
+async function getDependencias (){
+  let dependencias = await Spic.find({institucionDependencia : {$exists: true }}).distinct('institucionDependencia').exec();
+  return dependencias;
+}
+
+module.exports.getDependencias = getDependencias;
 
 exports.get_dependencias = function() {
   return new Promise(function(resolve, reject) {
