@@ -40,7 +40,7 @@ let spicSchema = new Schema({
 });
  
 let Spic = model('Spic', spicSchema, 'spic');
- 
+
 module.exports = {
    spicSchema,
    Spic

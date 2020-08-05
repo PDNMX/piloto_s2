@@ -1,5 +1,5 @@
 'use strict';
-
+const mongoose = require('mongoose');
 var path = require('path');
 var http = require('http');
 
@@ -10,6 +10,13 @@ var serverPort = 8080;
 var options = {
     controllers: path.join(__dirname, './controllers')
 };
+
+require('dotenv').config({path: './utils/.env'});
+console.log('mongodb://'+process.env.USERMONGO+':'+process.env.PASSWORDMONGO+'@'+process.env.HOSTMONGO+'/'+process.env.DATABASE);
+//connection mongo db
+const db = mongoose.connect('mongodb://'+process.env.USERMONGO+':'+process.env.PASSWORDMONGO+'@'+process.env.HOSTMONGO+'/'+process.env.DATABASE, { useNewUrlParser: true,  useUnifiedTopology: true  })
+    .then(() => console.log('Connect to MongoDB..'))
+    .catch(err => console.error('Could not connect to MongoDB..', err))
 
 
 var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
