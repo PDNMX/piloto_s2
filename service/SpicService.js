@@ -40,141 +40,100 @@ exports.get_dependencias = function() {
  * body ReqSpic JSON para peticiones de busqueda avanzada
  * returns resSpic
  **/
+
 exports.post_spic = function(body) {
   return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = {
-  "pagination" : {
-    "hasNextPage" : true,
-    "pageSize" : 100,
-    "page" : 20,
-    "totalRows" : 30
-  },
-  "results" : [ {
-    "institucionDependencia" : {
-      "clave" : "XYZ987",
-      "siglas" : "SHCP",
-      "nombre" : "Secretaría de Hacienda y Crédito Público"
-    },
-    "ramo" : {
-      "clave" : 23,
-      "valor" : "Provisiones salariales y económicas"
-    },
-    "primerApellido" : "Pérez",
-    "segundoApellido" : "Mendez",
-    "superiorInmediato" : {
-      "puesto" : {
-        "nombre" : "Director de área",
-        "nivel" : "1234567890"
-      },
-      "primerApellido" : "Lopez",
-      "segundoApellido" : "Perez",
-      "curp" : "BADD110313HCMLNS09",
-      "rfc" : "CUPU800825569",
-      "nombres" : "Juan"
-    },
-    "rfc" : "JPM851111C44",
-    "tipoProcedimiento" : [ {
-      "clave" : 1,
-      "valor" : "CONTRATACIONES PÚBLICAS"
-    }, {
-      "clave" : 1,
-      "valor" : "CONTRATACIONES PÚBLICAS"
-    } ],
-    "nombres" : "John Juan",
-    "puesto" : {
-      "nombre" : "Director de área",
-      "nivel" : "1234567890"
-    },
-    "tipoArea" : [ {
-      "clave" : "T",
-      "valor" : "TÉCNICA"
-    }, {
-      "clave" : "RE",
-      "valor" : "RESPONSABLE DE LA EJECUCIÓN"
-    } ],
-    "nivelResponsabilidad" : [ {
-      "clave" : "A",
-      "valor" : "ATENCIÓN"
-    }, {
-      "clave" : "A",
-      "valor" : "ATENCIÓN"
-    } ],
-    "fechaCaptura" : "2019-01-21T17:32:28Z",
-    "ejercicioFiscal" : "2018",
-    "genero" : {
-      "clave" : "M",
-      "valor" : "MASCULINO"
-    },
-    "id" : "RFT129",
-    "curp" : "BEML920313HMCLNS09"
-  }, {
-    "institucionDependencia" : {
-      "clave" : "XYZ987",
-      "siglas" : "SHCP",
-      "nombre" : "Secretaría de Hacienda y Crédito Público"
-    },
-    "ramo" : {
-      "clave" : 23,
-      "valor" : "Provisiones salariales y económicas"
-    },
-    "primerApellido" : "Pérez",
-    "segundoApellido" : "Mendez",
-    "superiorInmediato" : {
-      "puesto" : {
-        "nombre" : "Director de área",
-        "nivel" : "1234567890"
-      },
-      "primerApellido" : "Lopez",
-      "segundoApellido" : "Perez",
-      "curp" : "BADD110313HCMLNS09",
-      "rfc" : "CUPU800825569",
-      "nombres" : "Juan"
-    },
-    "rfc" : "JPM851111C44",
-    "tipoProcedimiento" : [ {
-      "clave" : 1,
-      "valor" : "CONTRATACIONES PÚBLICAS"
-    }, {
-      "clave" : 1,
-      "valor" : "CONTRATACIONES PÚBLICAS"
-    } ],
-    "nombres" : "John Juan",
-    "puesto" : {
-      "nombre" : "Director de área",
-      "nivel" : "1234567890"
-    },
-    "tipoArea" : [ {
-      "clave" : "T",
-      "valor" : "TÉCNICA"
-    }, {
-      "clave" : "RE",
-      "valor" : "RESPONSABLE DE LA EJECUCIÓN"
-    } ],
-    "nivelResponsabilidad" : [ {
-      "clave" : "A",
-      "valor" : "ATENCIÓN"
-    }, {
-      "clave" : "A",
-      "valor" : "ATENCIÓN"
-    } ],
-    "fechaCaptura" : "2019-01-21T17:32:28Z",
-    "ejercicioFiscal" : "2018",
-    "genero" : {
-      "clave" : "M",
-      "valor" : "MASCULINO"
-    },
-    "id" : "RFT129",
-    "curp" : "BEML920313HMCLNS09"
-  } ]
-};
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
+   let {
+          page,
+          pageSize,
+          sort,
+          nombre,
+          clave,
+          siglas
+      } = body;
+
+
+   console.log('Body...', body);
+
+
+      const params = [
+          "nombres", "primerApellido", "segundoApellido", "curp", "rfc"
+      ];
+
+      let query = {"institucionDependencia" : { "nombre" : nombre, "clave" : clave, "siglas" : siglas }};
+      let _query= {"ejercicioFiscal" : "2016"};
+      let _sort = {};
+      var out = {};
+
+      if (typeof sort !== 'undefined') {
+          const sortFields = ["nombres", "primerApellido", "segundoApellido", "puesto", "institucionDependencia"];
+     sortFields.forEach(p => {
+              if (sort.hasOwnProperty(p) || typeof sort[p] === 'string') {
+                  _sort[p] = sort[p] !== 'asc' ? -1 : 1;
+              }
+          });
+      }
+
+      if (typeof query !== 'undefined') {
+          params.forEach(p => {
+              if (query.hasOwnProperty(p) || typeof query[p] === "string") {
+                  _query[p] = { $regex: query[p], $options: 'i' };
+              }
+          });
+
+          if (query.hasOwnProperty('tipoProcedimiento') && Array.isArray(query.tipoProcedimiento) && query.tipoProcedimiento.length > 0) {
+           console.log('TERCER IF ');
+              let or = [];
+
+              query.tipoProcedimiento.forEach(tp => {
+                  or.push({ tipoProcedimiento: { $elemMatch: { clave: tp } } })
+              });
+
+              _query.$or = or
+          }
+
+          if (query.hasOwnProperty('id') && query['id'].length > 0) {
+              _query['_id'] = (query['id'].length === 24) ? ObjectID(query['id']) : query['id'];
+          }
+
+        //  if (query.hasOwnProperty('institucionDependencia') && query['institucionDependencia'].length > 0) {
+            //  _query['institucionDependencia.nombre'] = { $regex: query['institucionDependencia'], $options: 'i' };
+          //}
+      }
+
+      console.log('---1',query);
+      console.log('2----',_query);
+
+       //Bloque de prueba:
+       MongoClient.connect(dbConf.url, dbConf.client_options).then(client => {
+            const db = client.db();
+            const spic = db.collection('spic');
+            const skip = page === 1 ? 0 : (page - 1) * pageSize;
+           // console.log('page: ', page , '  pageSize',pageSize, 'query', query);
+            let cursor = spic.find(query).skip(skip).limit(pageSize).collation({ locale: "en", strength: 1 });
+           // console.log("Instruccion de busqueda", cursor);
+            if (JSON.stringify(_sort) !== '{}') {
+                cursor.sort(_sort);
+                }
+            cursor.count().then(totalRows => {
+                  cursor.toArray()
+                  .then(results => {
+                  let hasNextPage = (page * pageSize) < totalRows;
+                  out = {
+                    "pagination" : {
+                        "pageSize" : pageSize,
+                        "page" : page,
+                        "totalRows" : totalRows,
+                        "hasNextPage" : hasNextPage
+                    },
+                    "results":results
+                    }
+                 // console.log('Salida----  ',out);
+                  return resolve(out);
+
+               });
+             });
+        });
+
   });
 }
-
-
-
