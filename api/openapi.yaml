@@ -683,9 +683,14 @@ components:
         siglas: SHCP
         nombre: Secretaría de Hacienda y Crédito Público
   securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
     spic_auth:
       type: oauth2
       flows:
         password:
-          tokenUrl: /oauth
+          tokenUrl: https://127.0.0.1:9003/oauth/token
           scopes: {}

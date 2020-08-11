@@ -12,7 +12,6 @@ var options = {
 };
 
 require('dotenv').config({path: './utils/.env'});
-console.log('mongodb://'+process.env.USERMONGO+':'+process.env.PASSWORDMONGO+'@'+process.env.HOSTMONGO+'/'+process.env.DATABASE);
 //connection mongo db
 const db = mongoose.connect('mongodb://'+process.env.USERMONGO+':'+process.env.PASSWORDMONGO+'@'+process.env.HOSTMONGO+'/'+process.env.DATABASE, { useNewUrlParser: true,  useUnifiedTopology: true  })
     .then(() => console.log('Connect to MongoDB..'))
@@ -22,7 +21,6 @@ const db = mongoose.connect('mongodb://'+process.env.USERMONGO+':'+process.env.P
 var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
 expressAppConfig.addValidator();
 var app = expressAppConfig.getApp();
-
 
 // Initialize the Swagger middleware
 http.createServer(app).listen(serverPort, function () {
