@@ -39,14 +39,19 @@ async function get_dependencias (req, res, next) {
 };
 
 module.exports.post_spic = function post_spic (req, res, next, body) {
-  Spic.post_spic(body)
-    .then(function (response) {
-      utils.writeJson(res, response);
-    })
-    .catch(function (response) {
-      utils.writeJson(res, response);
-    });
-};
+    var code = validateToken(req);
 
+    if(code.code == 401){
+        res.status(401).json({code: '401', message: code.message});
+    }else if (code.code == 200 ){
+        Spic.post_spic(body)
+            .then(function (response) {
+                utils.writeJson(res, response);
+            })
+            .catch(function (response) {
+                utils.writeJson(res, response);
+            });
+    }
+};
 
 module.exports.get_dependencias = get_dependencias;
