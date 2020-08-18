@@ -2,39 +2,84 @@
 // MongoDB
 var dbConf = require('../utils/db_conf');
 const { url, client_options } = require('../utils/db_conf');
-var mongoose = require('mongoose');
 var { Spic } = require('../utils/models');
 const { MongoClient, ObjectID } = require('mongodb');
+
+
+function diacriticSensitiveRegex(string = '') {
+    return string.replace(/a/g, '[a,á,à,ä]')
+        .replace(/e/g, '[e,é,ë]')
+        .replace(/i/g, '[i,í,ï]')
+        .replace(/o/g, '[o,ó,ö,ò]')
+        .replace(/u/g, '[u,ü,ú,ù]')
+        .replace(/A/g, '[a,á,à,ä]')
+        .replace(/E/g, '[e,é,ë]')
+        .replace(/I/g, '[i,í,ï]')
+        .replace(/O/g, '[o,ó,ö,ò]')
+        .replace(/U/g, '[u,ü,ú,ù]')
+}
 
 async function getDependencias (){
   let dependencias = await Spic.find({institucionDependencia : {$exists: true }}).distinct('institucionDependencia').exec();
   return dependencias;
 }
 
-module.exports.getDependencias = getDependencias;
+async function post_spic (body) {
+    let sortObj = body.sort;
+    let page = body.page;  //numero de papostgina a mostrar
+    let pageSize = body.pageSize;
+    let query = body.query;
 
-exports.get_dependencias = function() {
-  return new Promise(function(resolve, reject) {
+    let newQuery= {};
+    let newSort={};
 
-     MongoClient.connect(dbConf.url, dbConf.client_options).then(client => {
-     const db = client.db();
-     const spic = db.collection('spic');
+    for (let [key, value] of Object.entries(sortObj)) {
+        if(key === "institucionDependencia"){
+            newSort[key+".nombre"]= value
+        }if(key === "puesto"){
+            newSort[key+".nombre"]= value
+        }else{
+            newSort[key]= value;
+        }
+    }
 
-     spic.createIndex({ 'posts.when': -1 })
+    for (let [key, value] of Object.entries(query)) {
+        if( key === "curp" || key === "rfc"){
+            newQuery[key] = { $regex : value,  $options : 'i'}
+        }
+        else if(key === "segundoApellido" ){
+            newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
+        }else if(key === "primerApellido"){
+            newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
+        }
+        else if(key === "nombres"){
+            newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
+        }else if(key === "institucionDependencia"){
+            newQuery[key+".nombre"]={ $regex : diacriticSensitiveRegex(value),  $options : 'i'}
+        }else if( key === "tipoProcedimiento"){
+            newQuery[key+".clave"]= { $in : value};
+        }else{
+            newQuery[key]= value;
+        }
+    }
 
-     .then(() => spic.aggregate([
-      { $group: { _id: { nombre: "$institucionDependencia.nombre", siglas: "$institucionDependencia.siglas", clave: "$institucionDependencia.clave" } } },
-       ]).toArray())
-           .then(results => {
-            return resolve(results);
-        });
-     });
+    if(pageSize <= 200 && pageSize >= 1){
+        let dependencias  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
+        let objpagination ={hasNextPage : dependencias.hasNextPage, page:dependencias.page, pageSize : dependencias.limit, totalRows: dependencias.totalDocs }
+        let objresults = dependencias.docs;
 
+        let dependenciasResolve= {};
+        dependenciasResolve["results"]= objresults;
+        dependenciasResolve["pagination"] = objpagination;
 
-});
+        return dependenciasResolve;
+
+    }else{
+        throw new RangeError("page size fuera del limite, verificar campo");
+    }
 }
-
-
+module.exports.post_spic = post_spic;
+module.exports.getDependencias = getDependencias;
 
 /**
  * Servidores públicos que intervienen en contrataciones.
@@ -43,7 +88,7 @@ exports.get_dependencias = function() {
  * returns resSpic
  **/
 
-exports.post_spic = function(body) {
+exports.post_spicP = function(body) {
   return new Promise(function(resolve, reject) {
    let {
           page,

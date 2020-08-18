@@ -49,7 +49,9 @@ module.exports.post_spic = function post_spic (req, res, next, body) {
                 utils.writeJson(res, response);
             })
             .catch(function (response) {
-                utils.writeJson(res, response);
+                if(response instanceof  RangeError){
+                    res.status(401).json({code: '401', message:  response.message});
+                }
             });
     }
 };
