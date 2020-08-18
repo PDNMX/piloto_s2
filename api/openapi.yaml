@@ -7,12 +7,12 @@ externalDocs:
   description: Más información.
   url: https://github.com/PDNMX/api_docs
 servers:
-- url: /
+  - url: /
 paths:
   /v1/spic:
     post:
       tags:
-      - spic
+        - spic
       summary: Servidores públicos que intervienen en contrataciones.
       operationId: post_spic
       requestBody:
@@ -48,12 +48,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/resError'
       security:
-      - spic_auth: []
+        - spic_auth: []
       x-swagger-router-controller: Spic
   /v1/spic/dependencias:
     get:
       tags:
-      - spic
+        - spic
       summary: Servidores públicos que intervienen en contrataciones
       operationId: get_dependencias
       responses:
@@ -82,14 +82,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/resError'
       security:
-      - spic_auth: []
+        - spic_auth: []
       x-swagger-router-controller: Spic
 components:
   schemas:
     resSpic:
       required:
-      - pagination
-      - results
+        - pagination
+        - results
       type: object
       properties:
         pagination:
@@ -103,96 +103,96 @@ components:
           page: 20
           totalRows: 30
         results:
-        - institucionDependencia:
-            clave: XYZ987
-            siglas: SHCP
-            nombre: Secretaría de Hacienda y Crédito Público
-          ramo:
-            clave: 23
-            valor: Provisiones salariales y económicas
-          primerApellido: Pérez
-          segundoApellido: Mendez
-          superiorInmediato:
+          - institucionDependencia:
+              clave: XYZ987
+              siglas: SHCP
+              nombre: Secretaría de Hacienda y Crédito Público
+            ramo:
+              clave: 23
+              valor: Provisiones salariales y económicas
+            primerApellido: Pérez
+            segundoApellido: Mendez
+            superiorInmediato:
+              puesto:
+                nombre: Director de área
+                nivel: "1234567890"
+              primerApellido: Lopez
+              segundoApellido: Perez
+              curp: BADD110313HCMLNS09
+              rfc: CUPU800825569
+              nombres: Juan
+            rfc: JPM851111C44
+            tipoProcedimiento:
+              - clave: 1
+                valor: CONTRATACIONES PÚBLICAS
+              - clave: 1
+                valor: CONTRATACIONES PÚBLICAS
+            nombres: John Juan
             puesto:
               nombre: Director de área
               nivel: "1234567890"
-            primerApellido: Lopez
-            segundoApellido: Perez
-            curp: BADD110313HCMLNS09
-            rfc: CUPU800825569
-            nombres: Juan
-          rfc: JPM851111C44
-          tipoProcedimiento:
-          - clave: 1
-            valor: CONTRATACIONES PÚBLICAS
-          - clave: 1
-            valor: CONTRATACIONES PÚBLICAS
-          nombres: John Juan
-          puesto:
-            nombre: Director de área
-            nivel: "1234567890"
-          tipoArea:
-          - clave: T
-            valor: TÉCNICA
-          - clave: RE
-            valor: RESPONSABLE DE LA EJECUCIÓN
-          nivelResponsabilidad:
-          - clave: A
-            valor: ATENCIÓN
-          - clave: A
-            valor: ATENCIÓN
-          fechaCaptura: 2019-01-21T17:32:28Z
-          ejercicioFiscal: "2018"
-          genero:
-            clave: M
-            valor: MASCULINO
-          id: RFT129
-          curp: BEML920313HMCLNS09
-        - institucionDependencia:
-            clave: XYZ987
-            siglas: SHCP
-            nombre: Secretaría de Hacienda y Crédito Público
-          ramo:
-            clave: 23
-            valor: Provisiones salariales y económicas
-          primerApellido: Pérez
-          segundoApellido: Mendez
-          superiorInmediato:
+            tipoArea:
+              - clave: T
+                valor: TÉCNICA
+              - clave: RE
+                valor: RESPONSABLE DE LA EJECUCIÓN
+            nivelResponsabilidad:
+              - clave: A
+                valor: ATENCIÓN
+              - clave: A
+                valor: ATENCIÓN
+            fechaCaptura: 2019-01-21T17:32:28Z
+            ejercicioFiscal: "2018"
+            genero:
+              clave: M
+              valor: MASCULINO
+            id: RFT129
+            curp: BEML920313HMCLNS09
+          - institucionDependencia:
+              clave: XYZ987
+              siglas: SHCP
+              nombre: Secretaría de Hacienda y Crédito Público
+            ramo:
+              clave: 23
+              valor: Provisiones salariales y económicas
+            primerApellido: Pérez
+            segundoApellido: Mendez
+            superiorInmediato:
+              puesto:
+                nombre: Director de área
+                nivel: "1234567890"
+              primerApellido: Lopez
+              segundoApellido: Perez
+              curp: BADD110313HCMLNS09
+              rfc: CUPU800825569
+              nombres: Juan
+            rfc: JPM851111C44
+            tipoProcedimiento:
+              - clave: 1
+                valor: CONTRATACIONES PÚBLICAS
+              - clave: 1
+                valor: CONTRATACIONES PÚBLICAS
+            nombres: John Juan
             puesto:
               nombre: Director de área
               nivel: "1234567890"
-            primerApellido: Lopez
-            segundoApellido: Perez
-            curp: BADD110313HCMLNS09
-            rfc: CUPU800825569
-            nombres: Juan
-          rfc: JPM851111C44
-          tipoProcedimiento:
-          - clave: 1
-            valor: CONTRATACIONES PÚBLICAS
-          - clave: 1
-            valor: CONTRATACIONES PÚBLICAS
-          nombres: John Juan
-          puesto:
-            nombre: Director de área
-            nivel: "1234567890"
-          tipoArea:
-          - clave: T
-            valor: TÉCNICA
-          - clave: RE
-            valor: RESPONSABLE DE LA EJECUCIÓN
-          nivelResponsabilidad:
-          - clave: A
-            valor: ATENCIÓN
-          - clave: A
-            valor: ATENCIÓN
-          fechaCaptura: 2019-01-21T17:32:28Z
-          ejercicioFiscal: "2018"
-          genero:
-            clave: M
-            valor: MASCULINO
-          id: RFT129
-          curp: BEML920313HMCLNS09
+            tipoArea:
+              - clave: T
+                valor: TÉCNICA
+              - clave: RE
+                valor: RESPONSABLE DE LA EJECUCIÓN
+            nivelResponsabilidad:
+              - clave: A
+                valor: ATENCIÓN
+              - clave: A
+                valor: ATENCIÓN
+            fechaCaptura: 2019-01-21T17:32:28Z
+            ejercicioFiscal: "2018"
+            genero:
+              clave: M
+              valor: MASCULINO
+            id: RFT129
+            curp: BEML920313HMCLNS09
     reqSpic:
       type: object
       properties:
@@ -224,8 +224,8 @@ components:
         $ref: '#/components/schemas/dependencias_inner'
     resError:
       required:
-      - code
-      - message
+        - code
+        - message
       properties:
         code:
           type: string
@@ -238,10 +238,10 @@ components:
       description: Estos valores son definidos por el sistema del API.
     resSpic_pagination:
       required:
-      - hasNextPage
-      - page
-      - pageSize
-      - totalRows
+        - hasNextPage
+        - page
+        - pageSize
+        - totalRows
       type: object
       properties:
         pageSize:
@@ -276,37 +276,37 @@ components:
           description: Campo a ordenar de forma ascendente o descente
           example: asc
           enum:
-          - asc
-          - desc
+            - asc
+            - desc
         primerApellido:
           type: string
           description: Campo a ordenar de forma ascendente o descente
           example: asc
           enum:
-          - asc
-          - desc
+            - asc
+            - desc
         segundoApellido:
           type: string
           description: Campo a ordenar de forma ascendente o descente
           example: asc
           enum:
-          - asc
-          - desc
+            - asc
+            - desc
         institucionDependencia:
           type: string
           description: Campo a ordenar de forma ascendente o descente, se debe ordenar
             por el valor
           example: asc
           enum:
-          - asc
-          - desc
+            - asc
+            - desc
         puesto:
           type: string
           description: Campo a ordenar de forma ascendente o descente
           example: asc
           enum:
-          - asc
-          - desc
+            - asc
+            - desc
     reqSpic_query:
       properties:
         id:
@@ -343,8 +343,8 @@ components:
           uniqueItems: true
           type: array
           example:
-          - 1
-          - 2
+            - 1
+            - 2
           items:
             maximum: 4
             minimum: 1
@@ -361,13 +361,13 @@ components:
           example: GOAP780710RH7
     respSpic_inner:
       required:
-      - fechaCaptura
-      - id
-      - institucionDependencia
-      - nombres
-      - primerApellido
-      - puesto
-      - tipoProcedimiento
+        - fechaCaptura
+        - id
+        - institucionDependencia
+        - nombres
+        - primerApellido
+        - puesto
+        - tipoProcedimiento
       type: object
       properties:
         id:
@@ -431,9 +431,9 @@ components:
                 \ `M` - MASCULINO\n  * `O` - OTRO\n"
               example: M
               enum:
-              - F
-              - M
-              - O
+                - F
+                - M
+                - O
             valor:
               type: string
               description: Valor del genero
@@ -443,7 +443,7 @@ components:
             valor: MASCULINO
         institucionDependencia:
           required:
-          - nombre
+            - nombre
           type: object
           properties:
             nombre:
@@ -487,10 +487,10 @@ components:
           type: array
           description: Tipo de área.
           example:
-          - clave: T
-            valor: TÉCNICA
-          - clave: RE
-            valor: RESPONSABLE DE LA EJECUCIÓN
+            - clave: T
+              valor: TÉCNICA
+            - clave: RE
+              valor: RESPONSABLE DE LA EJECUCIÓN
           items:
             type: object
             properties:
@@ -506,12 +506,12 @@ components:
                     * `R` - REQUIRENTE
                 example: T
                 enum:
-                - T
-                - RE
-                - RC
-                - O
-                - C
-                - R
+                  - T
+                  - RE
+                  - RC
+                  - O
+                  - C
+                  - R
               valor:
                 type: string
                 description: Valor del tipo de área
@@ -532,16 +532,16 @@ components:
                 type: string
                 example: A
                 enum:
-                - A
-                - T
-                - R
+                  - A
+                  - T
+                  - R
               valor:
                 type: string
                 example: ATENCIÓN
                 enum:
-                - ATENCIÓN
-                - TRAMITACIÓN
-                - RESOLUCIÓN
+                  - ATENCIÓN
+                  - TRAMITACIÓN
+                  - RESOLUCIÓN
             example:
               clave: A
               valor: ATENCIÓN
@@ -562,10 +562,10 @@ components:
               valor:
                 type: string
                 enum:
-                - CONTRATACIONES PÚBLICAS
-                - CONCESIONES, LICENCIAS, PERMISOS, AUTORIZACIONES Y PRÓRROGAS
-                - ENAJENACIÓN DE BIENES MUEBLES
-                - ASIGNACIÓN Y EMISION DE DICTAMENES DE AVALÚOS NACIONALES
+                  - CONTRATACIONES PÚBLICAS
+                  - CONCESIONES, LICENCIAS, PERMISOS, AUTORIZACIONES Y PRÓRROGAS
+                  - ENAJENACIÓN DE BIENES MUEBLES
+                  - ASIGNACIÓN Y EMISION DE DICTAMENES DE AVALÚOS NACIONALES
             example:
               clave: 1
               valor: CONTRATACIONES PÚBLICAS
@@ -638,24 +638,24 @@ components:
           nombres: Juan
         rfc: JPM851111C44
         tipoProcedimiento:
-        - clave: 1
-          valor: CONTRATACIONES PÚBLICAS
-        - clave: 1
-          valor: CONTRATACIONES PÚBLICAS
+          - clave: 1
+            valor: CONTRATACIONES PÚBLICAS
+          - clave: 1
+            valor: CONTRATACIONES PÚBLICAS
         nombres: John Juan
         puesto:
           nombre: Director de área
           nivel: "1234567890"
         tipoArea:
-        - clave: T
-          valor: TÉCNICA
-        - clave: RE
-          valor: RESPONSABLE DE LA EJECUCIÓN
+          - clave: T
+            valor: TÉCNICA
+          - clave: RE
+            valor: RESPONSABLE DE LA EJECUCIÓN
         nivelResponsabilidad:
-        - clave: A
-          valor: ATENCIÓN
-        - clave: A
-          valor: ATENCIÓN
+          - clave: A
+            valor: ATENCIÓN
+          - clave: A
+            valor: ATENCIÓN
         fechaCaptura: 2019-01-21T17:32:28Z
         ejercicioFiscal: "2018"
         genero:

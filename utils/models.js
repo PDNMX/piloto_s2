@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
-
+const mongoosePaginate = require('mongoose-paginate-v2');
  
-let spicSchema = new Schema({
+const spicSchema = new Schema({
    fechaCaptura: String,
    ejercicioFiscal: String,
    ramo: { clave: Number, valor: String },
@@ -38,7 +38,9 @@ let spicSchema = new Schema({
       }
    }
 });
- 
+
+spicSchema.plugin(mongoosePaginate);
+
 let Spic = model('Spic', spicSchema, 'spic');
 
 module.exports = {
