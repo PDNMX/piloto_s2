@@ -1,5 +1,6 @@
 'use strict';
 // MongoDB
+var _ = require('underscore');
 var dbConf = require('../utils/db_conf');
 const { url, client_options } = require('../utils/db_conf');
 var { Spic } = require('../utils/models');
@@ -44,7 +45,9 @@ async function post_spic (body) {
     }
 
     for (let [key, value] of Object.entries(query)) {
-        if( key === "curp" || key === "rfc"){
+        if(key === "id"){
+            newQuery["_id"] = value;
+        }else if( key === "curp" || key === "rfc"){
             newQuery[key] = { $regex : value,  $options : 'i'}
         }
         else if(key === "segundoApellido" ){
@@ -63,13 +66,23 @@ async function post_spic (body) {
         }
     }
 
+    console.log(newQuery);
     if(pageSize <= 200 && pageSize >= 1){
         let dependencias  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
         let objpagination ={hasNextPage : dependencias.hasNextPage, page:dependencias.page, pageSize : dependencias.limit, totalRows: dependencias.totalDocs }
         let objresults = dependencias.docs;
 
+        try {
+            var strippedRows = _.map(objresults, function (row) {
+              let rowExtend=  _.extend({id: row._id} , row.toObject());
+              return _.omit(rowExtend, '_id');
+            });
+        }catch (e) {
+            console.log(e);
+        }
+
         let dependenciasResolve= {};
-        dependenciasResolve["results"]= objresults;
+        dependenciasResolve["results"]= strippedRows;
         dependenciasResolve["pagination"] = objpagination;
 
         return dependenciasResolve;
