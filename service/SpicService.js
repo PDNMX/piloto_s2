@@ -36,65 +36,68 @@ async function post_spic (body) {
     let sortObj = body.sort  === undefined ? {} : body.sort;
     let page = body.page;  //numero de papostgina a mostrar
     let pageSize = body.pageSize;
-    let query = body.query === undefined ? {} : body.query ;
+    let query = body.query === undefined ? {} : body.query;
 
-    console.log(query);
-    let newQuery= {};
-    let newSort={};
-
-    for (let [key, value] of Object.entries(sortObj)) {
-        if(key === "institucionDependencia"){
-            newSort[key+".nombre"]= value
-        }if(key === "puesto"){
-            newSort[key+".nombre"]= value
-        }else{
-            newSort[key]= value;
-        }
-    }
-
-    for (let [key, value] of Object.entries(query)) {
-        if(key === "id"){
-            newQuery["_id"] = value;
-        }else if( key === "curp" || key === "rfc"){
-            newQuery[key] = { $regex : value,  $options : 'i'}
-        }
-        else if(key === "segundoApellido" ){
-            newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
-        }else if(key === "primerApellido"){
-            newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
-        }
-        else if(key === "nombres"){
-            newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
-        }else if(key === "institucionDependencia"){
-            newQuery[key+".nombre"]={ $regex : diacriticSensitiveRegex(value),  $options : 'i'}
-        }else if( key === "tipoProcedimiento"){
-            newQuery[key+".clave"]= { $in : value};
-        }else{
-            newQuery[key]= value;
-        }
-    }
-    if(pageSize <= 200 && pageSize >= 1){
-        let dependencias  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
-        let objpagination ={hasNextPage : dependencias.hasNextPage, page:dependencias.page, pageSize : dependencias.limit, totalRows: dependencias.totalDocs }
-        let objresults = dependencias.docs;
-
-        try {
-            var strippedRows = _.map(objresults, function (row) {
-              let rowExtend=  _.extend({id: row._id} , row.toObject());
-              return _.omit(rowExtend, '_id');
-            });
-        }catch (e) {
-            console.log(e);
-        }
-
-        let dependenciasResolve= {};
-        dependenciasResolve["results"]= strippedRows;
-        dependenciasResolve["pagination"] = objpagination;
-
-        return dependenciasResolve;
-
+    if(page <= 0 ){
+        throw new RangeError("page out of range");
     }else{
-        throw new RangeError("page size fuera del limite, verificar campo");
+        let newQuery= {};
+        let newSort={};
+
+        for (let [key, value] of Object.entries(sortObj)) {
+            if(key === "institucionDependencia"){
+                newSort[key+".nombre"]= value
+            }if(key === "puesto"){
+                newSort[key+".nombre"]= value
+            }else{
+                newSort[key]= value;
+            }
+        }
+
+        for (let [key, value] of Object.entries(query)) {
+            if(key === "id"){
+                newQuery["_id"] = value;
+            }else if( key === "curp" || key === "rfc"){
+                newQuery[key] = { $regex : value,  $options : 'i'}
+            }
+            else if(key === "segundoApellido" ){
+                newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
+            }else if(key === "primerApellido"){
+                newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
+            }
+            else if(key === "nombres"){
+                newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
+            }else if(key === "institucionDependencia"){
+                newQuery[key+".nombre"]={ $regex : diacriticSensitiveRegex(value),  $options : 'i'}
+            }else if( key === "tipoProcedimiento"){
+                newQuery[key+".clave"]= { $in : value};
+            }else{
+                newQuery[key]= value;
+            }
+        }
+        if(pageSize <= 200 && pageSize >= 1){
+            let dependencias  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
+            let objpagination ={hasNextPage : dependencias.hasNextPage, page:dependencias.page, pageSize : dependencias.limit, totalRows: dependencias.totalDocs }
+            let objresults = dependencias.docs;
+
+            try {
+                var strippedRows = _.map(objresults, function (row) {
+                    let rowExtend=  _.extend({id: row._id} , row.toObject());
+                    return _.omit(rowExtend, '_id');
+                });
+            }catch (e) {
+                console.log(e);
+            }
+
+            let dependenciasResolve= {};
+            dependenciasResolve["results"]= strippedRows;
+            dependenciasResolve["pagination"] = objpagination;
+
+            return dependenciasResolve;
+
+        }else{
+            throw new RangeError("page size out of range");
+        }
     }
 }
 module.exports.post_spic = post_spic;
