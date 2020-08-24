@@ -22,15 +22,15 @@ var validateToken = function(req){
         return {code: 200, message: decoded};
     } catch(err) {
         // err
-        let obj = {code: 401, message: err};
+        let obj = {code: 401, message: err.message};
         return obj;
     }
 }
 
 async function get_dependencias (req, res, next) {
      var code = validateToken(req);
-
      if(code.code == 401){
+         console.log(code);
          res.status(401).json({code: '401', message: code.message});
      }else if (code.code == 200 ){
          let dependencias = await Spic.getDependencias();
