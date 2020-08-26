@@ -19,8 +19,8 @@ function diacriticSensitiveRegex(string = '') {
 }
 
 async function getDependencias (){
-  let dependencias = await Spic.find({institucionDependencia : {$exists: true }}).distinct('institucionDependencia').exec();
-  return dependencias;
+    let dependencias = await Spic.find({institucionDependencia : {$exists: true }}).distinct('institucionDependencia').exec();
+    return dependencias;
 }
 
 
@@ -59,7 +59,11 @@ async function post_spic (body) {
                 if((value.trim().length || 0) > 0){
                     if(ObjectId.isValid(value)){
                         newQuery["_id"] = value;
+                    }else{
+                        newQuery["_id"] = null;
                     }
+                }else{
+                    newQuery["_id"] = null;
                 }
             }else if( key === "curp" || key === "rfc"){
                 newQuery[key] = { $regex : value,  $options : 'i'}
@@ -79,8 +83,7 @@ async function post_spic (body) {
                 newQuery[key]= value;
             }
         }
-
-        console.log(newQuery);
+            console.log(newQuery);
         if(pageSize <= 200 && pageSize >= 1){
             let dependencias  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
             let objpagination ={hasNextPage : dependencias.hasNextPage, page:dependencias.page, pageSize : dependencias.limit, totalRows: dependencias.totalDocs }
