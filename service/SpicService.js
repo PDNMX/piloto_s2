@@ -2,10 +2,10 @@
 // MongoDB
 var _ = require('underscore');
 var { Spic } = require('../utils/models');
-const { MongoClient, ObjectID } = require('mongodb');
-
+var ObjectId = require('mongoose').Types.ObjectId;
 
 function diacriticSensitiveRegex(string = '') {
+    string = string.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     return string.replace(/a/g, '[a,á,à,ä]')
         .replace(/e/g, '[e,é,ë]')
         .replace(/i/g, '[i,í,ï]')
@@ -39,7 +39,7 @@ async function post_spic (body) {
     let query = body.query === undefined ? {} : body.query;
 
     if(page <= 0 ){
-        throw new RangeError("page out of range");
+        throw new RangeError("Error campo page fuera de rango");
     }else{
         let newQuery= {};
         let newSort={};
@@ -56,7 +56,13 @@ async function post_spic (body) {
 
         for (let [key, value] of Object.entries(query)) {
             if(key === "id"){
-                newQuery["_id"] = value;
+                if((value.trim().length || 0) > 0){
+                    if(ObjectId.isValid(value)){
+                        newQuery["_id"] = value;
+                    }else{
+                        throw new SyntaxError("Error el campo id no es valido, favor de verificar el campo ");
+                    }
+                }
             }else if( key === "curp" || key === "rfc"){
                 newQuery[key] = { $regex : value,  $options : 'i'}
             }
@@ -75,6 +81,8 @@ async function post_spic (body) {
                 newQuery[key]= value;
             }
         }
+
+        console.log(newQuery);
         if(pageSize <= 200 && pageSize >= 1){
             let dependencias  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
             let objpagination ={hasNextPage : dependencias.hasNextPage, page:dependencias.page, pageSize : dependencias.limit, totalRows: dependencias.totalDocs }
@@ -96,7 +104,7 @@ async function post_spic (body) {
             return dependenciasResolve;
 
         }else{
-            throw new RangeError("page size out of range");
+            throw new RangeError("Error campo pageSize fuera de rango, el rango del campo es 1..200 ");
         }
     }
 }

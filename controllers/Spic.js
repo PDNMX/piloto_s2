@@ -22,7 +22,18 @@ var validateToken = function(req){
         return {code: 200, message: decoded};
     } catch(err) {
         // err
-        let obj = {code: 401, message: err.message};
+        let error="" ;
+        if (err.message === "jwt must be provided"){
+            error = "Error el token de autenticación (JWT) es requerido en el header, favor de verificar"
+        }else if(err.message === "invalid signature" || err.message.includes("Unexpected token")){
+            error = "Error token invalido, el token probablemente ha sido modificado favor de verificar"
+        }else if (err.message ==="jwt expired"){
+            error = "Error el token de autenticación (JWT) ha expirado, favor de enviar uno valido "
+        }else {
+            error = err.message;
+        }
+
+        let obj = {code: 401, message: error};
         return obj;
     }
 }
@@ -49,8 +60,13 @@ module.exports.post_spic = function post_spic (req, res, next, body) {
                 utils.writeJson(res, response);
             })
             .catch(function (response) {
+                if(response.message === "request.body.query.tipoProcedimiento should be array"){
+                    res.status(422).json({code: '422', message:  "Error el campo tipoProcedimiento tiene que ser un arreglo"});
+                }
                 if(response instanceof  RangeError){
-                    res.status(401).json({code: '401', message:  response.message});
+                    res.status(422).json({code: '422', message:  response.message});
+                }else if (response instanceof  SyntaxError){
+                    res.status(422).json({code: '422', message:  response.message});
                 }
             });
     }
