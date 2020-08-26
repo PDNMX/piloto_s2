@@ -59,8 +59,6 @@ async function post_spic (body) {
                 if((value.trim().length || 0) > 0){
                     if(ObjectId.isValid(value)){
                         newQuery["_id"] = value;
-                    }else{
-                        throw new SyntaxError("Error el campo id no es valido, favor de verificar el campo ");
                     }
                 }
             }else if( key === "curp" || key === "rfc"){
