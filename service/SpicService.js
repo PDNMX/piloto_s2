@@ -62,8 +62,6 @@ async function post_spic (body) {
                     }else{
                         newQuery["_id"] = null;
                     }
-                }else{
-                    newQuery["_id"] = null;
                 }
             }else if( key === "curp" || key === "rfc"){
                 newQuery[key] = { $regex : value,  $options : 'i'}
@@ -85,9 +83,9 @@ async function post_spic (body) {
         }
             console.log(newQuery);
         if(pageSize <= 200 && pageSize >= 1){
-            let dependencias  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
-            let objpagination ={hasNextPage : dependencias.hasNextPage, page:dependencias.page, pageSize : dependencias.limit, totalRows: dependencias.totalDocs }
-            let objresults = dependencias.docs;
+            let paginationResult  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
+            let objpagination ={hasNextPage : paginationResult.hasNextPage, page:paginationResult.page, pageSize : paginationResult.limit, totalRows: paginationResult.totalDocs }
+            let objresults = paginationResult.docs;
 
             try {
                 var strippedRows = _.map(objresults, function (row) {
@@ -99,9 +97,8 @@ async function post_spic (body) {
             }
 
             let dependenciasResolve= {};
-            dependenciasResolve["results"]= strippedRows;
             dependenciasResolve["pagination"] = objpagination;
-
+            dependenciasResolve["results"]= strippedRows;
             return dependenciasResolve;
 
         }else{

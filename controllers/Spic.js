@@ -26,9 +26,9 @@ var validateToken = function(req){
         if (err.message === "jwt must be provided"){
             error = "Error el token de autenticación (JWT) es requerido en el header, favor de verificar"
         }else if(err.message === "invalid signature" || err.message.includes("Unexpected token")){
-            error = "Error token invalido, el token probablemente ha sido modificado favor de verificar"
+            error = "Error token inválido, el token probablemente ha sido modificado favor de verificar"
         }else if (err.message ==="jwt expired"){
-            error = "Error el token de autenticación (JWT) ha expirado, favor de enviar uno valido "
+            error = "Error el token de autenticación (JWT) ha expirado, favor de enviar uno válido "
         }else {
             error = err.message;
         }
