@@ -404,11 +404,13 @@ Esquema(para que se usa, qué pasa si se actualiza el esquema?)
 
 # Transferencia de conocimiento
 
-El siguiente diagrama muestra la estructura del proyectos con los principales archivos y su interacción.
 
-![](RackMultipart20200831-4-84r70g_html_9acdbe6b412857f6.gif)
 
 index.js Este archivo contiene la lógica para la inicialización y configuración de swagger; además, de la conexión a la base de datos S2
+
+write.js    Este archivo le da formato a la respuesta. 
+datos S2
+openapi.yaml    Este archivo define las rutas, los esquemas de entrada y salida, y las restricciones de cada uno de ellos para ser utilizado por el archivo de index.js. Para más información, ver Ref.[5] 
 
 Spic.js Este archivo contiene la lógica de la API para el Sistema 2 para recibir las solicitud ReqSpic y enviar la respuesta resSpic; además, valida que tenga autorización Oauth 2.0
 
@@ -428,19 +430,41 @@ SpicService.js Este archivo contiene la lógica principal de las solicitudes a l
 
 Las siguientes porciones de código muestran la inicialización y configuración de Swagger:
 
-| &#39;use strict&#39;;const mongoose = require(&#39;mongoose&#39;);var path = require(&#39;path&#39;);var http = require(&#39;http&#39;);
-var oas3Tools = require(&#39;oas3-tools&#39;);var serverPort = 8080;
-// swaggerRouter configurationvar options = {controllers: path.join(\_\_dirname, &#39;./controllers&#39;)};require(&#39;dotenv&#39;).config({path: &#39;./utils/.env&#39;}); |
-| --- |
+```javascript
+'use strict';
+const mongoose = require('mongoose');
+var path = require('path');
+var http = require('http');
 
-| var expressAppConfig = oas3Tools.expressAppConfig(path.join(\_\_dirname, &#39;api/openapi.yaml&#39;), options);expressAppConfig.addValidator();var app = expressAppConfig.getApp();
-// Initialize the Swagger middlewarehttp.createServer(app).listen(serverPort, function () {console.log(&#39;Your server is listening on port %d (http://localhost:%d)&#39;, serverPort, serverPort);console.log(&#39;Swagger-ui is available on http://localhost:%d/docs&#39;, serverPort);}); |
-| --- |
+var oas3Tools = require('oas3-tools');
+var serverPort = 8080;
+
+// swaggerRouter configuration
+var options = {
+    controllers: path.join(__dirname, './controllers')
+};
+require('dotenv').config({path: './utils/.env'});
+
+var expressAppConfig = oas3Tools.expressAppConfig(path.join(__dirname, 'api/openapi.yaml'), options);
+expressAppConfig.addValidator();
+var app = expressAppConfig.getApp();
+
+// Initialize the Swagger middleware
+http.createServer(app).listen(serverPort, function () {
+    console.log('Your server is listening on port %d (http://localhost:%d)', serverPort, serverPort);
+    console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
+});
+```
 
 La lógica de conexión a la base de datos S2 de MongoDB se muestra en el siguiente fragmento de código.
 
-| //connection mongo dbconst db = mongoose.connect(&#39;mongodb://&#39;+process.env.USERMONGO+&#39;:&#39;+process.env.PASSWORDMONGO+&#39;@&#39;+process.env.HOSTMONGO+&#39;/&#39;+process.env.DATABASE, { useNewUrlParser: true, useUnifiedTopology: true }).then(() =\&gt; console.log(&#39;Connect to MongoDB..&#39;)).catch(err =\&gt; console.error(&#39;Could not connect to MongoDB..&#39;, err)) |
-| --- |
+```javascript
+//connection mongo db
+const db = mongoose.connect('mongodb://'+process.env.USERMONGO+':'+process.env.PASSWORDMONGO+'@'+process.env.HOSTMONGO+'/'+process.env.DATABASE, { useNewUrlParser: true,  useUnifiedTopology: true  })
+   .then(() => console.log('Connect to MongoDB..'))
+   .catch(err => console.error('Could not connect to MongoDB..', err))
+
+```
 
   1.
 ## Spic.js
@@ -453,16 +477,48 @@ Las siguientes funciones son utilizadas en el archivo Spic.js:
 - get\_dependencias (req, res, next)
 - post\_spic(req, res, next, body))
 
-    1.
+
 ### validateToken(req)
 
 Esta función toma los parámetros de entrada de la solicitud req, busca en el header la llave Authorization:Bearer &#60;token&#62; para obtener y validar el token, para esto, se utiliza la librería jsonwebtoken y la variable de entorno SEED. En caso de que el token sea válido y se tenga los roles necesarios, entonces se autoriza la solicitud de caso contrario se obtienen los mensajes de error los cuales se traducen al español.
 
 A continuación, se muestra el código de la función validateToken(req):
 
-| var validateToken = function(req){var inToken = null;var auth = req.headers[&#39;authorization&#39;];if (auth &amp;&amp; auth.toLowerCase().indexOf(&#39;bearer&#39;) == 0) {inToken = auth.slice(&#39;bearer &#39;.length);} else if (req.body &amp;&amp; req.body.access\_token) {inToken = req.body.access\_token;} else if (req.query &amp;&amp; req.query.access\_token) {inToken = req.query.access\_token;}// invalid token - synchronoustry {var decoded = jwt.verify(inToken, process.env.SEED );return {code: 200, message: decoded};} catch(err) {// errlet error=&quot;&quot; ;if (err.message === &quot;jwt must be provided&quot;){error = &quot;Error el token de autenticación (JWT) es requerido en el header, favor de verificar&quot;}else if(err.message === &quot;invalid signature&quot; || err.message.includes(&quot;Unexpected token&quot;)){error = &quot;Error token invalido, el token probablemente ha sido modificado favor de verificar&quot;}else if (err.message ===&quot;jwt expired&quot;){error = &quot;Error el token de autenticación (JWT) ha expirado, favor de enviar uno válido &quot;}else {error = err.message;}
-let obj = {code: 401, message: error};return obj;}} |
-| --- |
+```javascript
+
+var validateToken = function(req){
+    var inToken = null;
+    var auth = req.headers['authorization'];
+    if (auth && auth.toLowerCase().indexOf('bearer') == 0) {
+        inToken = auth.slice('bearer '.length);
+    } else if (req.body && req.body.access_token) {
+        inToken = req.body.access_token;
+    } else if (req.query && req.query.access_token) {
+        inToken = req.query.access_token;
+    }
+    // invalid token - synchronous
+    try {
+        var decoded =  jwt.verify(inToken, process.env.SEED );
+        return {code: 200, message: decoded};
+    } catch(err) {
+        // err
+        let error="" ;
+        if (err.message === "jwt must be provided"){
+            error = "Error el token de autenticación (JWT) es requerido en el header, favor de verificar"
+        }else if(err.message === "invalid signature" || err.message.includes("Unexpected token")){
+            error = "Error token invalido, el token probablemente ha sido modificado favor de verificar"
+        }else if (err.message ==="jwt expired"){
+            error = "Error el token de autenticación (JWT) ha expirado, favor de enviar uno válido "
+        }else {
+            error = err.message;
+        }
+
+        let obj = {code: 401, message: error};
+        return obj;
+    }
+}
+
+```
 
 La sentencia para acceder al header es la siguiente:
 
@@ -474,37 +530,119 @@ La sentencia para validar el token es la siguiente:
 | jwt.verify(inToken, process.env.SEED ); |
 | --- |
 
-    1.
+
 ### get\_dependencias (req, res, next)
 
-Esta función obtiene las instituciones distintas que son dependencias y están almacenadas en la base de datos S2. En primer lugar se valida el token, si el token no es válido retornará un error, si es válido llamaráEl siguiente fragmento de código muestra la llamada a la función getDependencias() que está en el archivo SpicService.js y retornará el resultado a través de la función writeJson de writer.js.
+Esta función obtiene las distintas dependencias almacenadas en la base de datos S2. En primer lugar, se valida el token, si el token no es válido retornará un error, y si es válido llamará a la función  getDependencias() que está en el archivo SpicService.js y retornará el resultado a través de la función writeJson que está en el archivo writer.js. 
 
-| async function get\_dependencias (req, res, next) {var code = validateToken(req);if(code.code == 401){console.log(code);res.status(401).json({code: &#39;401&#39;, message: code.message});}else if (code.code == 200 ){let dependencias = await Spic.getDependencias();utils.writeJson(res,dependencias);}}; |
-| --- |
+``` javascript
+async function get_dependencias (req, res, next) {
+     var code = validateToken(req);
+     if(code.code == 401){
+         console.log(code);
+         res.status(401).json({code: '401', message: code.message});
+     }else if (code.code == 200 ){
+         let dependencias = await Spic.getDependencias();
+         utils.writeJson(res,dependencias);
+     }
+};
 
-    1.
+```
+
+  
 ### post\_spic(req, res, next, body)
 
-Esta función obtiene los documentos de la base de datos S2 (esquema Spic) de acuerdo al filtrado, ordenamiento, y paginación solicitados. El siguiente fragmento de código muestra la llamada a la función post\_spic(body) que está en el archivo SpicService.js
+Esta función obtiene los documentos de la base de datos S2 (esquema Spic) de acuerdo al filtrado, ordenamiento, y paginación solicitados. El siguiente fragmento de código muestra la función  post_spic(req, res, next, body).
 
-En primer lugar se realiza la validación del token, si no es válido o eEn caso de que el flujo refleje un error se atrapan las excepciones que son mandadas desde el servicio y les da el formato solicitado del esquema de swagger resError.
+En primer lugar se realiza la validación del token, si no es válido o en caso de que el flujo refleje un error se atrapan las excepciones que son enviadas desde el servicio  y les da el formato solicitado del esquema de swagger resError.
 
-En caso de que el token sea válido, se llama a la función post\_spic del archivo SpicService.js y se retorna su valor utilizando writeJson de writer.js.
+En caso de que el token sea válido, se llama a la función post_spic(body) del archivo SpicService.js y se retorna su valor utilizando writeJson del archivo  writer.js.
 
-| module.exports.post\_spic = function post\_spic (req, res, next, body) { var code = validateToken(req);
- if(code.code == 401){ res.status(401).json({code: &#39;401&#39;, message: code.message}); }else if (code.code == 200 ){ Spic.post\_spic(body) .then(function (response) { utils.writeJson(res, response); }) .catch(function (response) { if(response.message === &quot;request.body.query.tipoProcedimiento should be array&quot;){ res.status(422).json({code: &#39;422&#39;, message: &quot;Error el campo tipoProcedimiento tiene que ser un arreglo&quot;}); } if(response instanceof RangeError){ res.status(422).json({code: &#39;422&#39;, message: response.message}); }else if (response instanceof SyntaxError){ res.status(422).json({code: &#39;422&#39;, message: response.message}); } }); }}; |
-| --- |
+
+``` javascript
+module.exports.post_spic = function post_spic (req, res, next, body) {
+    var code = validateToken(req);
+
+    if(code.code == 401){
+        res.status(401).json({code: '401', message: code.message});
+    }else if (code.code == 200 ){
+        Spic.post_spic(body)
+            .then(function (response) {
+                utils.writeJson(res, response);
+            })
+            .catch(function (response) {
+                if(response.message === "request.body.query.tipoProcedimiento should be array"){
+                    res.status(422).json({code: '422', message:  "Error el campo tipoProcedimiento tiene que ser un arreglo"});
+                }
+                if(response instanceof  RangeError){
+                    res.status(422).json({code: '422', message:  response.message});
+                }else if (response instanceof  SyntaxError){
+                    res.status(422).json({code: '422', message:  response.message});
+                }
+            });
+    }
+};
+
+```
 
   1.
 ## models.js
 
 El esquema spic y el modelo se encuentran en el archivo &#60;home\_directory&#62;/sistema\_pdn/piloto\_s2/utils/models.js
 
-| const { Schema, model } = require(&#39;mongoose&#39;);const mongoosePaginate = require(&#39;mongoose-paginate-v2&#39;);const spicSchema = new Schema({fechaCaptura: String,ejercicioFiscal: String,ramo: { clave: Number, valor: String },rfc: String,curp: String,nombres: String,primerApellido: String,segundoApellido: String,genero: { clave: String, valor: String},institucionDependencia: { nombre: String, clave: String, siglas: String},puesto: { nombre: String, nivel: String},tipoArea: { type: [], default: void 0 },tipoProcedimiento: { type: [], default: void 0 },nivelResponsabilidad: { type: [], default: void 0 },superiorInmediato: { nombres: String, primerApellido: String, segundoApellido: String, curp: String, rfc: String, puesto: { nombre: String, nivel: String }}});
+```javascript
+
+const { Schema, model } = require('mongoose');
+const mongoosePaginate = require('mongoose-paginate-v2');
+ 
+const spicSchema = new Schema({
+   fechaCaptura: String,
+   ejercicioFiscal: String,
+   ramo: { clave: Number, valor: String },
+   rfc: String,
+   curp: String,
+   nombres: String,
+   primerApellido: String,
+   segundoApellido: String,
+   genero: {
+       clave: String,
+       valor: String
+   },
+   institucionDependencia: {
+       nombre: String,
+       clave: String,
+       siglas: String
+   },
+   puesto: {
+       nombre: String,
+       nivel: String
+   },
+   tipoArea: { type: [], default: void 0 },
+   tipoProcedimiento: { type: [], default: void 0 },
+   nivelResponsabilidad: { type: [], default: void 0 },
+   superiorInmediato: {
+       nombres: String,
+       primerApellido: String,
+       segundoApellido: String,
+       curp: String,
+       rfc: String,
+       puesto: {
+           nombre: String,
+           nivel: String
+      }
+   }
+});
+
 spicSchema.plugin(mongoosePaginate);
-let Spic = model(&#39;Spic&#39;, spicSchema, &#39;spic&#39;);
-module.exports = {spicSchema,Spic}; |
-| --- |
+
+let Spic = model('Spic', spicSchema, 'spic');
+
+module.exports = {
+   spicSchema,
+   Spic
+};
+
+```
 
 Los esquemas o &quot;schemas&quot; son la definición de la entidad, es decir, del documento. Dentro de cada schema se definen los campos y el tipo de dato de cada uno de ellos.
 
@@ -515,7 +653,7 @@ En el código anterior, se hace uso de la función paginate() de la librería pa
 | spicSchema.plugin(mongoosePaginate); |
 | --- |
 
-  1.
+
 ## SpicService.js
 
 La lógica principal de las solicitudes al sistema S2 está contenida en el archivo &#60;home\_directory&#62;/sistema\_pdn/piloto\_s2/service/SpicService.js
@@ -524,30 +662,40 @@ Las funciones dentro de los servicios son de tipo async, esto porque los método
 
 Al final de los archivos de servicios, se exportan las funciones para ser reconocidas a la hora de importarlos en el archivo controllers/Spic.js.
 
-La siguiente línea de código de este archivo permite importar los servicios que son los que realizan las peticiones a la base de datos:
-
-| var Spic = require(&quot;../service/SpicService&quot;); |
-| --- |
-
 Los servicios correspondientes a MongoDB están en el directorio &#60;home\_directory&#62;/sistema\_pdn/piloto\_s2/service.
 
-DY dentro del archivo SpicServce.js, se tienen varias funciones que se describen en las siguientes secciones.
+Dentro del archivo SpicServce.js, se tienen varias funciones que se describen en las siguientes secciones.
 
-    1.
 ### diacriticSensitiveRegex(text)
 
 La función diacriticSensitiveRegex(text) se utiliza en la sensibilidad de los acentos. Recibe el parámetro text, el cual es una cadena de texto, y reemplaza las vocales por la sintaxis correcta para que sea insensible a los acentos mediante una función regex.
 
-| function diacriticSensitiveRegex(string = &#39;&#39;) { string = string.normalize(&quot;NFD&quot;).replace(/[\u0300-\u036f]/g, &quot;&quot;); return string.replace(/a/g, &#39;[a,á,à,ä]&#39;) .replace(/e/g, &#39;[e,é,ë]&#39;) .replace(/i/g, &#39;[i,í,ï]&#39;) .replace(/o/g, &#39;[o,ó,ö,ò]&#39;) .replace(/u/g, &#39;[u,ü,ú,ù]&#39;) .replace(/A/g, &#39;[a,á,à,ä]&#39;) .replace(/E/g, &#39;[e,é,ë]&#39;) .replace(/I/g, &#39;[i,í,ï]&#39;) .replace(/O/g, &#39;[o,ó,ö,ò]&#39;) .replace(/U/g, &#39;[u,ü,ú,ù]&#39;)} |
-| --- |
-
-    1.
+```javascript
+function diacriticSensitiveRegex(string = '') {
+    string = string.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return string.replace(/a/g, '[a,á,à,ä]')
+        .replace(/e/g, '[e,é,ë]')
+        .replace(/i/g, '[i,í,ï]')
+        .replace(/o/g, '[o,ó,ö,ò]')
+        .replace(/u/g, '[u,ü,ú,ù]')
+        .replace(/A/g, '[a,á,à,ä]')
+        .replace(/E/g, '[e,é,ë]')
+        .replace(/I/g, '[i,í,ï]')
+        .replace(/O/g, '[o,ó,ö,ò]')
+        .replace(/U/g, '[u,ü,ú,ù]')
+}
+```
 ### getDependencias()
 
-La función getDependencias() devuelve las dependencias utilizando el método GET. Estas dependencias son extraídas de la misma colección spic de la base de datos S2. En el siguiente código se muestra las instrucciones para obtener las dependencias que son distintas.
+La función getDependencias() devuelve las dependencias. Estas dependencias son extraídas de la misma colección spic de la base de datos S2. En el siguiente código se muestra las instrucciones para obtener las dependencias que son distintas.
 
-| async function getDependencias (){ let dependencias = await Spic.find({institucionDependencia : {$exists: true }}).distinct(&#39;institucionDependencia&#39;).exec(); return dependencias;} |
-| --- |
+```javascript
+async function getDependencias (){
+    let dependencias = await Spic.find({institucionDependencia : {$exists: true }}).distinct('institucionDependencia').exec();
+    return dependencias;
+}
+
+```
 
 El código utiliza el modelo Spic exportado y generado en el archivo utils/models.js
 
@@ -555,7 +703,7 @@ Este modelo hace una solicitud a la base de datos con el método find(), dentro 
 
 Después de tener los documentos filtrados, se eliminan los duplicados con la función distinct(&quot;institucionDependencia&quot;).
 
-    1.
+   
 ### post\_spic(body)
 
 La función post\_spic(body) devuelve la información del esquema spic y tiene la capacidad de filtrar, ordenar y paginar. utilizando el método POST. Esta función se divide en tres partes importantes, como se describe a continuación:
@@ -564,78 +712,68 @@ La función post\_spic(body) devuelve la información del esquema spic y tiene l
 
 El método recibe el body en formato json y extrae los parámetros de la siguiente manera
 
-| let pageSize = body.pageSize;let query = body.query === undefined ? {} : body.query; |
-| --- |
+```javascript
+let pageSize = body.pageSize;
+let query = body.query === undefined ? {} : body.query;
+```
 
 Dentro de la función también se realizan validaciones para los parámetros recibidos, por ejemplo el parámetro page no puede ser menor que 1.
-
-| if(page \&lt;= 0 ){ throw new RangeError(&quot;Error campo page fuera de rango&quot;);} |
-| --- |
-
+``` javascript
+  if(page <= 0 ){
+        throw new RangeError("Error campo page fuera de rango");
+}
+```
 - **Extracción de filtros de query**
 
 Del parámetro query, se obtienen los campos para el filtrado en forma de clave y valor, en donde cada clave tiene requerimientos diferentes en cuanto a reglas de negocio y validaciones necesarias. Ver [Tabla 3. Parámetros para el filtrado](#kix.i9huztfumsl6).
 
-Dentro de la función se irá armando un objeto json nuevo correspondiente al parámetro query, para armarlo se recorren los valores extraidos del query recibido en la petición del usuario, en búsqueda de los filtros permitidos y/o reconocidos por el estándar.En caso de ser necesario, se realizarán validaciones y/o mapeos.
+Dentro de la función se irá armando un objeto json nuevo correspondiente al parámetro query, para armarlo se recorren los valores extraídos del query recibido en la petición del usuario, en búsqueda de los filtros permitidos y/o reconocidos por el estándar. En caso de ser necesario, se realizarán validaciones y/o mapeos. 
 
-Por ejemplo, en el siguiente código se aprecia que en caso de recibir dentro del query el parámetro segundoApellido, se agregará al objeto nuevo pero una vez que sea transformado por la función diacriticSensitiveRegex, para hacer que el filtro no sea sensible a acentos Para generar el filtrado de los diversos campos, existe un apartado dentro de la función para cada uno de ellos que genera el query y que se enviará a la librería paginate-v2.
+Por ejemplo, en el siguiente código se aprecia que en caso de recibir dentro del query el parámetro segundoApellido, se agregará al objeto nuevo pero una vez que sea transformado por la función diacriticSensitiveRegex, para hacer que el filtro no sea sensible a acentos 
 
-| for (let [key, value] of Object.entries(query)) {if(key === &quot;segundoApellido&quot; ){ newQuery[key] = { $regex : diacriticSensitiveRegex(value), $options : &#39;i&#39;}.
- .
- . } |
-| --- |
-
-En el código previo al campo segundoApellido le damos formato al query antes de enviarlo a la librería paginate-v2.
-
-La aplicación de la función diacriticSensitiveRegex() se describe en la sección [diacriticSensitiveRegex](#_r8t700q7whjl)[(text)](#_r8t700q7whjl).
-
-El operador $regex permite buscar una expresión regular dentro del campo proporcionado la variable key del objeto , de esta forma podemos mandar cadenas de texto parciales.
-
-Finalmente, el operador $options con valor i permite generar una búsqueda sin importar sean mayúsculas o minúsculas.
+``` javascript
+for (let [key, value] of Object.entries(query)) {
+  if(key === "segundoApellido" ){
+                newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
+.
+.
+.
+            }
+```
 
 - Ordenamiento
 
+Dentro de la función se irá armando un objeto json nuevo correspondiente al parámetro sort, para armarlo se recorren los valores extraídos del campo sort recibido en la petición del usuario, en búsqueda de los filtros permitidos y/o reconocidos por el estándar. En caso de ser necesario, se realizarán validaciones y/o mapeos. 
+
+
+``` javascript
 for (let [key, value] of Object.entries(sortObj)) {
-
-if(key === &quot;institucionDependencia&quot;){
-
-newSort[key+&quot;.nombre&quot;]= value
-
-}if(key === &quot;puesto&quot;){
-
-newSort[key+&quot;.nombre&quot;]= value
-
-}else{
-
-newSort[key]= value;
-
+   if(key === "institucionDependencia"){
+       newSort[key+".nombre"]= value
+   }if(key === "puesto"){
+       newSort[key+".nombre"]= value
+   }else{
+       newSort[key]= value;
+   }
 }
+```
 
-}
-
-- **Obtención de datos y pPaginación**
+- **Obtención de datos y Paginación**
 
 **Una vez que se han procesado los parámetros recibidos en la petición, se armará la respuesta de la misma. Esta respuesta consiste, de acuerdo al estándar, en el parámetro de paginación y el arreglo de resultados.**
 
-| let paginationResult = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();let objpagination ={hasNextPage : dependencias.hasNextPage, page:dependencias.page, pageSize : dependencias.limit, totalRows: dependencias.totalDocs }let objresults = dependencias.docs;
-try {var strippedRows = \_.map(objresults, function (row) {let rowExtend= \_.extend({id: row.\_id} , row.toObject());return \_.omit(rowExtend, &#39;\_id&#39;);});}catch (e) {console.log(e);}
-let dependenciasResolve= {};dependenciasResolve[&quot;results&quot;]= strippedRows;dependenciasResolve[&quot;pagination&quot;] = objpagination;
-return dependenciasResolve;
- |
-| --- |
-
 Para la consulta hacia la base de datos, se utiliza la librería paginate-v2 la cual a través de la función paginate() genera la consulta y permite obtener los resultados filtrados por el query y la paginación correspondiente, que formarán parte de la respuesta del API.
 
-| let paginationResult = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();let objpagination ={hasNextPage : paginationResult.hasNextPage, page:paginationResult.page, pageSize : paginationResult.limit, totalRows: paginationResult.totalDocs }let objresults = paginationResult.docs;
- |
-| --- |
+``` javascript 
+let paginationResult  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
+let objpagination ={hasNextPage : paginationResult.hasNextPage, page:paginationResult.page, pageSize : paginationResult.limit, totalRows: paginationResult.totalDocs }
+let objresults = paginationResult.docs;
+```
 
 La función paginate() de la liberia paginate-v2 recibe 2 argumentos:
 
 1. newQuery
 2. objeto json {page :page , limit: pageSize, sort: newSort} con los valores para la paginación
-
-:
 
 Page : Número de página
 
@@ -643,18 +781,29 @@ Limit: Límite de registros por página
 
 Sort: Objeto clave valor, la clave refiere al nombre del campo y el valor refiere a uno de los dos posibles valores [asc,desc]
 
-En la implementación realizada, Eel campo \_id es el identificador de cada documento de la base de datos,; pero, en el request su nombre esviene como id, por lo tanto, a los documentos retornados por la base de datos es necesario se reemplazar el atributo \_id por id:, esto se muestra en el siguiente código.
+En la implementación realizada, el campo _id es el identificador de cada documento de la base de datos, pero en el request su nombre es id, por lo tanto, a los documentos retornados por la base de datos es necesario reemplazar el atributo _id por id:
 
-| try {var strippedRows = \_.map(objresults, function (row) {let rowExtend= \_.extend({id: row.\_id} , row.toObject());return \_.omit(rowExtend, &#39;\_id&#39;); });}catch (e) { console.log(e);} |
-| --- |
+``` javascript
+ try {
+            var strippedRows = _.map(objresults, function (row) {
+               let rowExtend=  _.extend({id: row._id} , row.toObject());
+               return _.omit(rowExtend, '_id');
+                });
+     }catch (e) {
+            console.log(e);
+     }
+
+```
 
 Finalmente se puede construir la respuesta del API la cual tendrá el campo pagination y results.
 
-|
- let dependenciasResolve= {}; dependenciasResolve[&quot;pagination&quot;] = objpagination; dependenciasResolve[&quot;results&quot;]= strippedRows; return dependenciasResolve; |
-| --- |
+``` javascript
+ let objResponse= {};
+            objResponse["pagination"] = objpagination;
+            objResponse["results"]= strippedRows;
+            return objResponse;
+```
 
-  1.
 ## Respuestas de error y causas
 
 La mayoría de los mensajes de error son proporcionados por las librerías utilizadas.

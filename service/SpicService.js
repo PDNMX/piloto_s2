@@ -96,10 +96,10 @@ async function post_spic (body) {
                 console.log(e);
             }
 
-            let dependenciasResolve= {};
-            dependenciasResolve["pagination"] = objpagination;
-            dependenciasResolve["results"]= strippedRows;
-            return dependenciasResolve;
+            let objResponse= {};
+            objResponse["pagination"] = objpagination;
+            objResponse["results"]= strippedRows;
+            return objResponse;
 
         }else{
             throw new RangeError("Error campo pageSize fuera de rango, el rango del campo es 1..200 ");
