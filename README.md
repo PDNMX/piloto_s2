@@ -369,39 +369,6 @@ Tabla 4. Parámetros de la Paginación
 
 Para los documentos obtenidos, se tiene el objeto results el cual es un arreglo de documentos, donde cada uno tiene el esquema de la colección spic, y que corresponden al filtrado y ordenamiento según los parámetros enviados en la solicitud POST. Para más información, ver la sección [Esquemas en la base de datos](#_7k0wgkx72mql).
 
-3. Transferencia (explicación general y diagrama)
-
-3.1 index.js -\&gt; qué se hace en este archivo?
-
-3.2 Spic.js-\&gt;controller (explicación muy general)
-
-3.2.1 validación token
-
-3.2.2 get\_dependencias
-
-3.2.3 post\_spic
-
-3.3 models.js
-
-Esquema(para que se usa, qué pasa si se actualiza el esquema?)
-
-3.4 SpicService.js
-
-3.4.1 diacriticSensitiveRegex(para que sirve, que usa)
-
-3.4.2 getDependencias(que hace?)
-
-3.4.3 post\_spic
-
--body(lo recibe, extrae parámetros)
-
--query(como extrae los filtros que llegaron,ejm de alguna validación de filtro)
-
--detalle en el código de este if if(pageSize \&lt;= 200 &amp;&amp; pageSize \&gt;= 1)
-
-3.5 Respuestas de error y causas
-
-
 # Transferencia de conocimiento
 
 
