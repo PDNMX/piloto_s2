@@ -51,7 +51,6 @@ async function get_dependencias (req, res, next) {
 
 module.exports.post_spic = function post_spic (req, res, next, body) {
     var code = validateToken(req);
-
     if(code.code == 401){
         res.status(401).json({code: '401', message: code.message});
     }else if (code.code == 200 ){
@@ -62,6 +61,9 @@ module.exports.post_spic = function post_spic (req, res, next, body) {
             .catch(function (response) {
                 if(response.message === "request.body.query.tipoProcedimiento should be array"){
                     res.status(422).json({code: '422', message:  "Error el campo tipoProcedimiento tiene que ser un arreglo"});
+                }
+                if(response.message === "request.body.query.tipoProcedimiento[0] should be <= 5"){
+                    res.status(422).json({code: '422', message:  response.message});
                 }
                 if(response instanceof  RangeError){
                     res.status(422).json({code: '422', message:  response.message});
