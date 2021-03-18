@@ -49,7 +49,14 @@ async function get_dependencias (req, res, next) {
      }
 };
 
-module.exports.post_spic = function post_spic (req, res, next, body) {
+module.exports.post_spic = function post_spic (req, res, next) {
+
+    let { body } = req;
+
+	if (!('page' in body)) body.page = 1;
+	if (!('pageSize' in body)) body.pageSize = 10;
+
+
     var code = validateToken(req);
     if(code.code == 401){
         res.status(401).json({code: '401', message: code.message});
