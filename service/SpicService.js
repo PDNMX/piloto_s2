@@ -37,6 +37,13 @@ async function post_spic (body) {
     let page = body.page;  //numero de papostgina a mostrar
     let pageSize = body.pageSize;
     let query = body.query === undefined ? {} : body.query;
+    let select = {
+        'rfc':0,
+        'curp':0,
+        'genero':0,
+        'superiorInmediato.curp':0,
+        'superiorInmediato.rfc':0,
+    }
 
     if(page <= 0 ){
         throw new RangeError("Error campo page fuera de rango");
@@ -83,7 +90,7 @@ async function post_spic (body) {
         }
             console.log(newQuery);
         if(pageSize <= 200 && pageSize >= 1){
-            let paginationResult  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort,select:{'rfc':0,'curp':0,'superiorInmediato.curp':0,'superiorInmediato.rfc':0}}).then();
+            let paginationResult  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort,select:select}).then();
             let objpagination ={hasNextPage : paginationResult.hasNextPage, page:paginationResult.page, pageSize : paginationResult.limit, totalRows: paginationResult.totalDocs }
             let objresults = paginationResult.docs;
 
