@@ -22,7 +22,7 @@
     "oas3-tools": "^2.0.2",
     "openapi-validator-middleware": "^3.2.2",
     "swagger-ui-express": "^4.1.6",
-    "underscore": "^1.10.2",
+    "underscore": "^1.12.1",
     "yarn": "^1.22.4"
   }
 }
