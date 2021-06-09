@@ -68,15 +68,15 @@ app.use((req, res, next) => {
 
 	var valid = validate(req.body);
 
-	if (!valid) {
-		localize.es(validate.errors);
+	// if (!valid) {
+	// 	localize.es(validate.errors);
 
-		let errores = validate.errors.map(({ message, dataPath }) => `${dataPath.slice(1)}: ${message}`);
+	// 	let errores = validate.errors.map(({ message, dataPath }) => `${dataPath.slice(1)}: ${message}`);
 
-		res.statusCode = 400;
-		next({ status: 400, errores });
-		return;
-	}
+	// 	res.statusCode = 400;
+	// 	next({ status: 400, errores: errores.join(' | ') });
+	// 	return;
+	// }
 	next();
 });
 
