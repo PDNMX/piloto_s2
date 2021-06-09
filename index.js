@@ -74,7 +74,7 @@ app.use((req, res, next) => {
 		let errores = validate.errors.map(({ message, dataPath }) => `${dataPath.slice(1)}: ${message}`);
 
 		res.statusCode = 400;
-		next({ status: 400, errores });
+		next({ status: 400, errores: errores.join(' | ') });
 		return;
 	}
 	next();
