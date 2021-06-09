@@ -83,7 +83,9 @@ async function post_spic (body) {
             }else if(key === "institucionDependencia"){
                 newQuery[key+".nombre"]={ $regex : diacriticSensitiveRegex(value),  $options : 'i'}
             }else if( key === "tipoProcedimiento"){
-                newQuery[key+".clave"]= { $in : value};
+                if(value.length > 0){
+                    newQuery[key+".clave"]= { $in : value};
+                }
             }else{
                 newQuery[key]= value;
             }
