@@ -85,7 +85,7 @@ async function post_spic (body) {
         }
             console.log(newQuery);
         if(pageSize <= 200 && pageSize >= 1){
-            let paginationResult  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort}).then();
+            let paginationResult  = await Spic.paginate(newQuery,{page :page , limit: pageSize, sort: newSort, collation:{locale:'es'}}).then();
             let objpagination ={hasNextPage : paginationResult.hasNextPage, page:paginationResult.page, pageSize : paginationResult.limit, totalRows: paginationResult.totalDocs }
             let objresults = paginationResult.docs;
 
