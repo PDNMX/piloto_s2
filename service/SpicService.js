@@ -5,17 +5,14 @@ var { Spic } = require('../utils/models');
 var ObjectId = require('mongoose').Types.ObjectId;
 
 function diacriticSensitiveRegex(string = '') {
+    string = string.toLowerCase().replace("ñ","#");
     string = string.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     return string.replace(/a/g, '[a,á,à,ä]')
         .replace(/e/g, '[e,é,ë]')
         .replace(/i/g, '[i,í,ï]')
         .replace(/o/g, '[o,ó,ö,ò]')
         .replace(/u/g, '[u,ü,ú,ù]')
-        .replace(/A/g, '[a,á,à,ä]')
-        .replace(/E/g, '[e,é,ë]')
-        .replace(/I/g, '[i,í,ï]')
-        .replace(/O/g, '[o,ó,ö,ò]')
-        .replace(/U/g, '[u,ü,ú,ù]')
+        .replace(/#/g,"ñ");
 }
 
 async function getDependencias (){
