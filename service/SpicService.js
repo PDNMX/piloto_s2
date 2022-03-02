@@ -61,14 +61,11 @@ async function post_spic (body) {
                     }
                 }
             }else if( key === "curp" || key === "rfc"){
+                if(value.trim().length)
                 newQuery[key] = { $regex : value,  $options : 'i'}
             }
-            else if(key === "segundoApellido" ){
-                newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
-            }else if(key === "primerApellido"){
-                newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
-            }
-            else if(key === "nombres"){
+            else if(key === "segundoApellido" || key=== "primerApellido" || key === "nombres"){
+                if(value.trim().length)
                 newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
             }else if(key === "institucionDependencia"){
                 newQuery[key+".nombre"]={ $regex : diacriticSensitiveRegex(value),  $options : 'i'}
