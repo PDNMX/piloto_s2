@@ -69,7 +69,7 @@ async function post_spic (body) {
                 }
             }else if( key === "curp" || key === "rfc"){
                 if(value.trim().length)
-                    newQuery[key] = { $regex : value,  $options : 'i'}
+                    newQuery[key] = { $regex : diacriticSensitiveRegex(value),  $options : 'i'}
             }
             else if(key === "segundoApellido" || key=== "primerApellido" || key === "nombres"){
                 if(value.trim().length)
