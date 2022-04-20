@@ -85,6 +85,12 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 app.post('/v1/spic', swaggerValidation.validate, post_spic);
 app.get('/v1/spic/dependencias', swaggerValidation.validate, get_dependencias);
 
+app.get('/getVersion', async (req,res, next) => {
+	res.json({
+		'version':'desarrollo - 20/04/2022'
+	});
+})
+;
 app.use((err, req, res, next) => {
 	res.status(err.status || 500).json({
 		code: err.status || 500,
